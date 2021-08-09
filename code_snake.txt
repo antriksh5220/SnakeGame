@@ -1,0 +1,107 @@
+import pygame
+import random
+pygame.init()
+
+white= (255,255,255)                                      #Colours
+red= (255,0,0)
+black= (0,0,0)
+
+gwindow = pygame.display.set_mode((1200,600))            #Creating game window
+pygame.display.set_caption("Snakezzz")
+pygame.display.update()
+
+def gameloop():
+    with open("highscore.txt","r") as f:
+        highscore = f. read()
+    exit_game = False                                        #Game specific variables
+    game_over = False
+    x=45
+    y=55
+    s=20
+    score=0
+    x_velo=0
+    y_velo=0
+    fps=90
+    foodx= random.randint(50,1150)
+    foody= random.randint(50,550)
+    clock=pygame.time.Clock()
+    font= pygame.font.SysFont(None,55)
+    snk_list = []
+    snk_length = 1
+
+    def plot_snake(gwindow, colour, snk_list, snk_size):
+        for x,y in snk_list:
+            pygame.draw.rect(gwindow, white, [x,y,s,s])
+
+    def text_screen(text, colour, a, b):
+        scrdis = font.render(text, True, colour)
+        gwindow.blit(scrdis, [a,b])
+
+    while not exit_game:                                     #Game loop
+        if game_over:
+            gwindow.fill(white)
+            text_screen("Score: "+str(score), red, 500, 200)
+            for event in pygame.event.get():
+
+                if event.type == pygame.QUIT:
+                    exit_game = True
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        gameloop()
+
+        else:
+            for event in pygame.event.get():
+
+                if event.type == pygame.QUIT:
+                    exit_game = True
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RIGHT:
+                        x_velo= 2.5
+                        y_velo=0
+                    if event.key == pygame.K_LEFT:
+                        x_velo= -2.5
+                        y_velo=0
+                    if event.key == pygame.K_DOWN:
+                        y_velo= 2.5
+                        x_velo=0
+                    if event.key == pygame.K_UP:
+                        y_velo= -2.5
+                        x_velo=0
+            if abs(x-foodx)<10 and abs(y-foody)<10:
+                score+=1
+                foodx= random.randint(50,1150)
+                foody= random.randint(50,550)
+                snk_length+= 10
+
+
+            x+= x_velo
+            y+= y_velo
+
+            gwindow.fill(black)
+            text_screen("Score:"+str(score), red, 5, 5)
+            #pygame.draw.rect(gwindow, white, [x,y,s,s])
+            pygame.draw.rect(gwindow, red, [foodx,foody,s,s])
+
+            head = []
+            head.append(x)
+            head.append(y)
+            snk_list.append(head)
+            if len(snk_list)> snk_length:
+                del snk_list[0]
+            
+            if head in snk_list[:-1]:
+                game_over = True
+
+            if x<0 or x>1200 or y<0 or y>600:
+                game_over = True
+
+            plot_snake(gwindow, black, snk_list, s)
+
+        pygame.display.update() 
+        clock.tick(fps)
+
+    pygame.quit()
+    quit()
+gameloop()
